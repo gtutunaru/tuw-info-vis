@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>House Price Data</title>
+
+    <!-- Load stylesheets -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Load libraries -->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.7.1.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <!-- Load custom scripts -->
+    <script src="js/control.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/map.js"></script>
+
+</head>
+<body>
+
+<div id="infovis-map">
+    <p>That purple area should be replaced with the map.</p>
+</div>
+
+<div id="infovis-sidebar" class="closed">
+    <div id="infovis-sidebar-header">
+        <p class="left-align nomargin nopadding">
+            <span id="infovis-sidebar-header-text">Filters</span>
+            <span style="float:right;">
+                <button onclick="toggleSidebar()"> >> </button>
+            </span>
+        </p>
+    </div>
+
+    <div id="infovis-sidebar-body">
+        <!-- TODO: Add the filters -->
+        <div class="infovis-filter">
+            Filter 1
+            <div class="slidecontainer">
+                <input type="range" min="1" max="100" value="50" class="slider" id="myRange1">
+            </div>
+        </div>
+        <div class="infovis-filter">
+            Filter 2
+            <div class="slidecontainer">
+                <input type="range" min="1" max="100" value="50" class="slider" id="myRange2">
+            </div>
+        </div>
+        <div class="infovis-filter">
+            Filter 3
+            <div class="slidecontainer">
+                <input type="range" min="1" max="100" value="50" class="slider" id="myRange3">
+            </div>
+        </div>
+        <div class="infovis-filter">
+            Filter 4
+            <div class="slidecontainer">
+                <input type="range" min="1" max="100" value="50" class="slider" id="myRange4">
+            </div>
+
+        </div>
+        <div class="infovis-filter">
+            Filter 5
+            <div class="slidecontainer">
+                <input type="range" min="1" max="100" value="50" class="slider" id="myRange5">
+            </div>
+
+        </div>
+        <div class="infovis-filter">
+            Filter 6
+            <div class="slidecontainer">
+                <input type="range" min="1" max="100" value="50" class="slider" id="myRange6">
+            </div>
+        </div>
+        <div class="infovis-filter">
+            Filter 7
+            <div class="slidecontainer">
+                <input type="range" min="1" max="100" value="50" class="slider" id="myRange7">
+            </div>
+        </div>
+        <div class="infovis-filter">
+            Filter 8
+            <div class="slidecontainer">
+                <input type="range" min="1" max="100" value="50" class="slider" id="myRange8">
+            </div>
+        </div>
+        <div class="infovis-filter">
+            Filter 9
+            <div class="slidecontainer">
+                <input type="range" min="1" max="100" value="50" class="slider" id="myRange9">
+            </div>
+        </div>
+        <div class="infovis-filter">
+            Filter 10
+            <div class="slidecontainer">
+                <input type="range" min="1" max="100" value="50" class="slider" id="myRange10">
+            </div>
+        </div>
+        <div class="infovis-filter">
+            Filter 11
+            <div class="slidecontainer">
+                <input type="range" min="1" max="100" value="50" class="slider" id="myRange11">
+            </div>
+        </div>
+        <div class="infovis-filter">
+            Filter 12
+            <div class="slidecontainer">
+                <input type="range" min="1" max="100" value="50" class="slider" id="myRange12">
+            </div>
+        </div>
+        <div class="infovis-filter">
+            Filter 13
+            <div class="slidecontainer">
+                <input type="range" min="1" max="100" value="50" class="slider" id="myRange13">
+            </div>
+        </div>
+        <div class="infovis-filter">
+            Filter 14
+            <div class="slidecontainer">
+                <input type="range" min="1" max="100" value="50" class="slider" id="myRange14">
+            </div>
+        </div>
+        <div class="infovis-filter">
+            Filter 15
+            <div class="slidecontainer">
+                <input type="range" min="1" max="100" value="50" class="slider" id="myRange15">
+            </div>
+        </div>
+        <div class="infovis-filter">
+            Filter 16
+            <div class="slidecontainer">
+                <input type="range" min="1" max="100" value="50" class="slider" id="myRange16">
+            </div>
+        </div>
+        <div class="infovis-filter">
+            Filter 17
+            <div class="slidecontainer">
+                <input type="range" min="1" max="100" value="50" class="slider" id="myRange17">
+            </div>
+        </div>
+        <div class="infovis-filter">
+            Filter 18
+            <div class="slidecontainer">
+                <input type="range" min="1" max="100" value="50" class="slider" id="myRange18">
+            </div>
+        </div>
+        <div class="infovis-filter">
+            Filter 19
+            <div class="slidecontainer">
+                <input type="range" min="1" max="100" value="50" class="slider" id="myRange19">
+            </div>
+        </div>
+        <div class="infovis-filter">
+            Filter 20
+            <div class="slidecontainer">
+                <input type="range" min="1" max="100" value="50" class="slider" id="myRange20">
+            </div>
+        </div>
+        <div class="infovis-filter">
+            Filter 21
+            <div class="slidecontainer">
+                <input type="range" min="1" max="100" value="50" class="slider" id="myRange21">
+            </div>
+        </div>
+        <div class="infovis-filter">
+            Filter 22
+            <div class="slidecontainer">
+                <input type="range" min="1" max="100" value="50" class="slider" id="myRange22">
+            </div>
+        </div>
+        <div class="infovis-filter">
+            Filter 23
+            <div class="slidecontainer">
+                <input type="range" min="1" max="100" value="50" class="slider" id="myRange23">
+            </div>
+        </div>
+        <div class="infovis-filter">
+            Filter 24
+            <div class="slidecontainer">
+                <input type="range" min="1" max="100" value="50" class="slider" id="myRange24">
+            </div>
+        </div>
+        <div class="infovis-filter">
+            Filter 25
+            <div class="slidecontainer">
+                <input type="range" min="1" max="100" value="50" class="slider" id="myRange25">
+            </div>
+        </div>
+    </div>
+
+    <div id="infovis-sidebar-footer">
+        <div id="infovis-color-coding">
+            <!-- TODO: Add the color-coding-selection -->
+            Choose a variable
+            <div>
+                <select name="cars" id="infovis-variable-color-coding">
+                    <option value="Variable 1">Variable 1</option>
+                    <option value="Variable 2">Variable 2</option>
+                    <option value="Variable 3">Variable 3</option>
+                    <option value="Variable 4">Variable 4</option>
+                    <option value="Variable 5">Variable 5</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
