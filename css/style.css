@@ -2,6 +2,10 @@
  * General stuff
  */
 
+html *
+{
+    font-family: Lato !important;
+}
 
 .left-align {
     text-align: left;
@@ -31,6 +35,7 @@
     text-align: center;
     background-color: rebeccapurple;
 }
+
 
 /**
  * Sidebar - General stuff

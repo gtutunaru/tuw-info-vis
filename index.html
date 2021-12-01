@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title>House Price Data</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.ico" />
 
     <!-- Load stylesheets -->
+    <link href='http://fonts.googleapis.com/css?family=Lato&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="css/style.css">
 
     <!-- Load libraries -->
@@ -20,7 +22,7 @@
 <body>
 
 <div id="infovis-map">
-    <p>That purple area should be replaced with the map.</p>
+    <div>That purple area should be replaced with the map.</div>
 </div>
 
 <div id="infovis-sidebar" class="closed">
@@ -191,15 +193,10 @@
 
     <div id="infovis-sidebar-footer">
         <div id="infovis-color-coding">
-            <!-- TODO: Add the color-coding-selection -->
-            Choose a variable
+            Visual encoding variable
             <div>
-                <select name="cars" id="infovis-variable-color-coding">
-                    <option value="Variable 1">Variable 1</option>
-                    <option value="Variable 2">Variable 2</option>
-                    <option value="Variable 3">Variable 3</option>
-                    <option value="Variable 4">Variable 4</option>
-                    <option value="Variable 5">Variable 5</option>
+                <select name="cars" id="infovis-variable-color-coding" onchange="updateVisualizations();">
+                    <!-- options added in initDropdown() -->
                 </select>
             </div>
         </div>
