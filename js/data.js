@@ -35,6 +35,12 @@ function loadData() {
             datum.lat = Number(datum.lat);
             datum.long = Number(datum.long);
 
+            // Auxiliary columns
+            const yearsSinceLastRenovation = datum.yr_built - datum.yr_renovated;
+            datum.time_since_last_renovation = yearsSinceLastRenovation <= 0 ? 0 : yearsSinceLastRenovation;
+            datum.last_renovation = yearsSinceLastRenovation === 0 ? 0 : yearsSinceLastRenovation <= 10 ? 1 : 2;
+            datum.has_basement = datum.sqft_basement > 0;
+
             return datum;
         });
     return data;
