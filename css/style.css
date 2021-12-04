@@ -129,6 +129,8 @@ html *
     height: calc(100vh - 50px - 50px - 66px - 5px - 81px);
     min-height: calc(100vh - 50px - 50px - 66px - 5px - 81px);
     max-height: calc(100vh - 50px - 50px - 66px - 5px - 81px);
+    padding-top: 0;
+    margin-top: 0;
 }
 
 .side-panel.left.opened .footer {
@@ -186,6 +188,14 @@ html *
  */
 
 
-.slidecontainer {
-    width: 100%;
+.infovis-filter {
+    margin: 0px 3px 8px 2px;
+}
+
+.infovis-filter .title {
+    margin-bottom: 0.2em;
+}
+
+.infovis-filter .range-input {
+    margin-bottom: 0.2em;
 }
