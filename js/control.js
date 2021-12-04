@@ -5,29 +5,17 @@
 
 
 /*
- * Sidebar handling
+ * Panel handling
  */
 
 
-function toggleSidebar() {
-    const isOpen = $("#infovis-sidebar").hasClass("opened");
+function togglePanel(selector) {
+    const isOpen = $(selector).hasClass("opened");
     if (isOpen) {
-        closeSidebar();
+        $(selector).removeClass("opened").addClass("closed");
     } else {
-        openSidebar();
+        $(selector).removeClass("closed").addClass("opened");
     }
-}
-
-
-function openSidebar() {
-    $("#infovis-sidebar").removeClass("closed").addClass("opened");
-    $("#infovis-sidebar-header button").html("<<");
-}
-
-
-function closeSidebar() {
-    $("#infovis-sidebar").removeClass("opened").addClass("closed");
-    $("#infovis-sidebar-header button").html(">>");
 }
 
 
@@ -192,10 +180,18 @@ function updateVisualizations() {
     const filteredData = filterData(filters);
     const colorCodingVariable = readColorCoding();
     const scalePromise = createScale(filteredData, colorCodingVariable);
+
     const mapConfig = {
         colorCodingVariableName: colorCodingVariable.id, // The name of the variable that should be used for visual encoding
         colorScalePromise: createColorScale(copyScale(scalePromise)), // The color scale for visual encoding
         sizeScalePromise: createSizeScale(copyScale(scalePromise)), // The size scale for visual encoding
     }
     updateMap(filteredData, mapConfig);
+
+    const visualizationsConfig = {
+        colorCodingVariableName: colorCodingVariable.id, // The name of the variable that should be used for visual encoding
+        colorScalePromise: createColorScale(copyScale(scalePromise)), // The color scale for visual encoding
+        sizeScalePromise: createSizeScale(copyScale(scalePromise)), // The size scale for visual encoding
+    }
+    updateCharts(filteredData, visualizationsConfig);
 }

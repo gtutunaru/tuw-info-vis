@@ -38,23 +38,36 @@ html *
 
 
 /**
- * Sidebar - General stuff
+ * Side panels (both) - General stuff
  */
 
-
-#infovis-sidebar {
+.side-panel {
     position: fixed;
-    top: 50px;
-    left: 0;
     z-index: 10;
-    width: 250px;
-    height: calc(100vh - 100px); /* 50px space on top and bottom */
     margin: 0;
     padding: 0 5px 0 5px;
-    background-color: aliceblue;
 }
 
-#infovis-sidebar-header {
+.side-panel.opened {
+    background-color: aliceblue;
+    height: calc(100vh - 100px); /* 50px space on top and bottom */
+}
+
+.side-panel.closed {
+    background-color: transparent;
+    height: 25px; /* The button has a height of 25px, don't know why  */
+    width: auto; /* Width of button */
+    margin-top: 5px;
+}
+
+.side-panel.closed .header {
+    height: auto;
+    padding: 0 0 0 0;
+    margin: 0 0 0 0;
+    border: none;
+}
+
+.side-panel .header {
     text-align: right;
     height: 50px;
     min-height: 50px;
@@ -64,16 +77,61 @@ html *
     border-bottom: 1px solid lightgray;
 }
 
-#infovis-sidebar-body {
-    /* Full height - space top - space bottom - height header incl. margin and padding and border - padding body - height footer incl. margind and padding and border */
-    height: calc(100vh - 50px - 50px - 66px - 5px - 81px);
-    min-height: calc(100vh - 50px - 50px - 66px - 5px - 81px);
-    max-height: calc(100vh - 50px - 50px - 66px - 5px - 81px);
+.side-panel.closed .header .title {
+    display: none;
+}
+
+.side-panel .header .control {
+    float: right;
+}
+
+.side-panel .toggle-button:after {
+    font-family: "Font Awesome 5 Free"; /* This is the correct font-family*/
+    color:#000;
+    font-style: normal;
+    font-weight:900;
+}
+
+.side-panel .toggle-button {
+    width: 25px;
+    margin-top: 5px;
+}
+
+.side-panel.opened .body {
     overflow-y: auto;
     padding-top: 5px;
 }
 
-#infovis-sidebar-footer {
+.side-panel.closed .body {
+    display: none;
+}
+
+.side-panel.closed .footer {
+    display: none;
+}
+
+
+/**
+ * Filter panel
+ */
+
+.side-panel.left {
+    top: 50px;
+    left: 0;
+}
+
+.side-panel.left.opened {
+    width: 10vw;
+}
+
+.side-panel.left.opened .body {
+    /* Full height - space top - space bottom - height header incl. margin and padding and border - padding body */
+    height: calc(100vh - 50px - 50px - 66px - 5px - 81px);
+    min-height: calc(100vh - 50px - 50px - 66px - 5px - 81px);
+    max-height: calc(100vh - 50px - 50px - 66px - 5px - 81px);
+}
+
+.side-panel.left.opened .footer {
     height: 60px;
     min-height: 60px;
     max-height: 60px;
@@ -83,59 +141,48 @@ html *
     border-top: 1px solid lightgray;
 }
 
+.side-panel.left.opened .toggle-button:after {
+    content: '\f100';
+}
+
+.side-panel.left.closed .toggle-button:after {
+    content: '\f101';
+}
+
 
 /**
- * Sidebar - Opened
+ * Visualizations panel
  */
 
 
-#infovis-sidebar.opened {
+.side-panel.right {
+    top: 50px;
+    right: 0;
 }
 
-#infovis-sidebar.opened #infovis-sidebar-header {
-}
-
-#infovis-sidebar.opened #infovis-sidebar-header #infovis-sidebar-header-text {
-}
-
-#infovis-sidebar.opened #infovis-sidebar-body {
+.side-panel.right.opened {
+    width: 85vw;
 }
 
 
-/**
- * Sidebar - Closed
- */
-
-
-#infovis-sidebar.closed {
-    background-color: transparent;
-    height: 25px; /* The button has a height of 25px, don't know why  */
-    width: auto; /* Width of button */
-    padding-top: 0;
+.side-panel.right.opened .body {
+    /* Full height - space top - space bottom - height header incl. margin and padding and border - padding body */
+    height: calc(100vh - 50px - 50px - 66px - 10px);
+    min-height: calc(100vh - 50px - 50px - 66px - 10px);
+    max-height: calc(100vh - 50px - 50px - 66px - 10px);
 }
 
-#infovis-sidebar.closed #infovis-sidebar-header {
-    height: auto;
-    padding: 0 0 0 0;
-    margin: 0 0 0 0;
-    border: none;
+.side-panel.right.opened .toggle-button:after {
+    content: '\f00d';
 }
 
-#infovis-sidebar.closed #infovis-sidebar-header #infovis-sidebar-header-text {
-    display: none;
-}
-
-#infovis-sidebar.closed #infovis-sidebar-body {
-    display: none;
-}
-
-#infovis-sidebar.closed #infovis-sidebar-footer {
-    display: none;
+.side-panel.right.closed .toggle-button:after {
+    content: '\f201';
 }
 
 
 /**
- * Filters in sidebar
+ * Filters in filter panel
  */
 
 

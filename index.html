@@ -7,6 +7,7 @@
 
     <!-- Load stylesheets -->
     <link href='http://fonts.googleapis.com/css?family=Lato&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.13.0/css/all.css">
     <link rel="stylesheet" href="css/style.css">
 
     <!-- Load libraries -->
@@ -17,6 +18,7 @@
     <script src="js/control.js"></script>
     <script src="js/data.js"></script>
     <script src="js/map.js"></script>
+    <script src="js/visualizations.js"></script>
 
 </head>
 <body>
@@ -25,17 +27,17 @@
     <div>That purple area should be replaced with the map.</div>
 </div>
 
-<div id="infovis-sidebar" class="closed">
-    <div id="infovis-sidebar-header">
+<div id="infovis-sidebar" class="side-panel left closed">
+    <div id="infovis-visualizations-panel-header" class="header">
         <p class="left-align nomargin nopadding">
-            <span id="infovis-sidebar-header-text">Filters</span>
-            <span style="float:right;">
-                <button onclick="toggleSidebar()"> >> </button>
+            <span class="title">Filters</span>
+            <span class="control">
+                <button onclick="togglePanel('#infovis-sidebar')" class="toggle-button"></button>
             </span>
         </p>
     </div>
 
-    <div id="infovis-sidebar-body">
+    <div id="infovis-sidebar-body" class="body">
         <!-- TODO: Add the filters -->
         <div class="infovis-filter">
             Filter 1
@@ -191,7 +193,7 @@
         </div>
     </div>
 
-    <div id="infovis-sidebar-footer">
+    <div id="infovis-sidebar-footer" class="footer">
         <div id="infovis-color-coding">
             Visual encoding variable
             <div>
@@ -200,6 +202,21 @@
                 </select>
             </div>
         </div>
+    </div>
+</div>
+
+<div id="infovis-visualizations-panel" class="side-panel right closed">
+    <div id="infovis-visualizations-panel-header" class="header">
+        <p class="left-align nomargin nopadding">
+            <span class="title">Visualizations</span>
+            <span class="control">
+                <button onclick="togglePanel('#infovis-visualizations-panel')" class="toggle-button"></button>
+            </span>
+        </p>
+    </div>
+
+    <div id="infovis-charts" class="body">
+        <!-- TODO: Add a visualization -->
     </div>
 </div>
 
