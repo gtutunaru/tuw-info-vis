@@ -37,6 +37,8 @@ function updateMap(dataPromise, mapConfig) {
                 .text(d => `${colorCodingVariableName}=${d[colorCodingVariableName]}`)
                 .style("background-color", d => colorScale(d[colorCodingVariableName]))
                 .style("font-size", d => parseInt(sizeScale(d[colorCodingVariableName])) + "px");
+            ps.exit()
+                .remove();
         });
     console.log("Updating map done");
 }

@@ -29,7 +29,7 @@ function togglePanel(selector) {
  * name: human readable name
  * type: one of "ordinal", "datetime", "numeric", "boolean"
  */
-var VARIABLES_CONFIG = [
+const VARIABLES_CONFIG = [
     {id: "condition", name: "Condition", type: "ordinal", nanValue: undefined,
         interaction: {method: "choice",
             choices: [{name: "Very bad", values: [1]}, {name: "Bad", values: [2]}, {name: "OK", values: [3]}, {name: "Good", values: [4]}, {name: "Very good", values: [5]}]}},
@@ -74,10 +74,29 @@ var VARIABLES_CONFIG = [
 ]
 
 
-var VARIABLES_CONFIG_MAP = VARIABLES_CONFIG.reduce(function (obj, x) {
+const VARIABLES_CONFIG_MAP = VARIABLES_CONFIG.reduce(function (obj, x) {
     obj[x.id] = x;
     return obj;
 }, {});
+
+
+const FILTER_VARIABLE_CONFIGS = [
+    "condition",
+    "price",
+    "yr_built",
+    "grade",
+    "bathrooms",
+    "bedrooms",
+    "floors",
+    // "date",
+    "sqft_above",
+    "sqft_living",
+    "sqft_lot",
+    "has_basement",
+    "last_renovation",
+    "view",
+    "waterfront",
+].map(variableName => VARIABLES_CONFIG_MAP[variableName]);
 
 
 function initDropdown() {
@@ -116,8 +135,8 @@ function initFilters() {
 
     const createRangeFilter = function (variableConfig) {
         return `
-            <div class="range-input"><input type="number" id="${variableConfig.id}-min" name="${variableConfig.id}" min="${variableConfig.interaction.min}" max="${variableConfig.interaction.max}" placeholder="${variableConfig.interaction.min}" onblur="updateVisualizations();"></div>
-            <div class="range-input"><input type="number" id="${variableConfig.id}-max" name="${variableConfig.id}" min="${variableConfig.interaction.min}" max="${variableConfig.interaction.max}" placeholder="${variableConfig.interaction.max}" onblur="updateVisualizations();"></div>
+            <div class="range-input"><input type="number" id="${variableConfig.id}-min" name="${variableConfig.id}-min" min="${variableConfig.interaction.min}" max="${variableConfig.interaction.max}" placeholder="${variableConfig.interaction.min}" onblur="updateVisualizations();"></div>
+            <div class="range-input"><input type="number" id="${variableConfig.id}-max" name="${variableConfig.id}-max" min="${variableConfig.interaction.min}" max="${variableConfig.interaction.max}" placeholder="${variableConfig.interaction.max}" onblur="updateVisualizations();"></div>
             `;
     }
 
@@ -126,6 +145,7 @@ function initFilters() {
             <div class="infovis-filter">
             <fieldset>
             <div class="title">${variableConfig.name}</div>
+            <div id="${variableConfig.id}-filter-values">
             ${variableConfig.interaction.method === "choice" ? createChoiceFilter(variableConfig) : createRangeFilter(variableConfig)}
             </div>
             </fieldset>
@@ -133,26 +153,9 @@ function initFilters() {
         `;
     }
 
-    const variableConfigs = [
-        "condition",
-        "price",
-        "yr_built",
-        "grade",
-        "bathrooms",
-        "bedrooms",
-        "floors",
-        // "date",
-        "sqft_above",
-        "sqft_living",
-        "sqft_lot",
-        "has_basement",
-        "last_renovation",
-        "view",
-        "waterfront",
-    ].map(variableName => VARIABLES_CONFIG_MAP[variableName]);
     d3.select("#infovis-sidebar-body")
         .selectAll("div")
-        .data(variableConfigs)
+        .data(FILTER_VARIABLE_CONFIGS)
         .enter()
         .append("div")
         .attr("class", "infovis-filter")
@@ -166,18 +169,95 @@ window.addEventListener("load", initFilters);
  */
 
 
+var readChoiceFilter = function (variableConfig) {
+    const filter = {
+        id: variableConfig.id,
+        active: false,
+        type: variableConfig.interaction.method,
+        choices: undefined,
+    };
+
+    const choiceValues = new Array();
+    $(`input:checkbox[name=${variableConfig.id}]:checked`).each(function() {
+        choiceValues.push( parseInt($(this).val()));
+    });
+
+    if (choiceValues.length === 0) {
+        return filter;
+    }
+
+    filter.active = true;
+    filter.choices = new Set(choiceValues.map(i => variableConfig.interaction.choices[i].values).flat());
+    return filter;
+}
+
+
+var readRangeFilter = function (variableConfig) {
+    const filter = {
+        id: variableConfig.id,
+        active: false,
+        type: variableConfig.interaction.method,
+        min: undefined,
+        max: undefined,
+    };
+
+    const minValue = variableConfig.interaction.min;
+    const maxValue = variableConfig.interaction.max;
+    let fromValue = parseInt($(`input#${variableConfig.id}-min`).val());
+    let toValue = parseInt($(`input#${variableConfig.id}-max`).val());
+    const isActive = isNaN(fromValue) && isNaN(toValue);
+    if (isActive) {
+        return filter;
+    }
+
+    fromValue = isNaN(fromValue) ? minValue : fromValue;
+    toValue = isNaN(toValue) ? maxValue : toValue;
+    if (fromValue < minValue) {
+        fromValue = minValue;
+        $(`input#${variableConfig.id}-min`).val(minValue);
+    }
+    if (toValue > maxValue) {
+        toValue = maxValue;
+        $(`input#${variableConfig.id}-max`).val(maxValue);
+    }
+
+    filter.active = true;
+    filter.min = fromValue;
+    filter.max = toValue;
+    return filter;
+}
+
+
+var readFilter = function (variableConfig) {
+    return variableConfig.interaction.method === "choice" ?
+        readChoiceFilter(variableConfig) : readRangeFilter(variableConfig);
+}
+
+
 /**
  * Read the current filter-settings from the
  */
 function readFilters() {
-    // TODO: Implement this function (the return value is not fixed, choose
-    //  whatever is useful - filterData needs to be updated accordingly). The
-    //  values should be taken from the filter inputs that can be set by the
-    //  users.
-    const filter = {
-        "price": [150000, 150500],
-    };
-    return filter;
+    const filters = FILTER_VARIABLE_CONFIGS
+        .map(readFilter)
+        .filter(filter => filter.active);
+
+    return filters;
+}
+
+
+const filterChoice = function(filter, datum) {
+    return filter.choices.has(datum[filter.id]);
+}
+
+
+const filterRange = function(filter, datum) {
+    return filter.min <= datum[filter.id] && datum[filter.id] <= filter.max;
+}
+
+
+const filter = function(filter, datum) {
+    return filter.type === "choice" ? filterChoice(filter, datum) : filterRange(filter, datum);
 }
 
 
@@ -187,19 +267,16 @@ function readFilters() {
  * @param filter: output from method readFilters
  * @returns {Promise<DSVRowArray<string>>}
  */
-function filterData(filter) {
-    // TODO: Implement this function
+function filterData(filters) {
+    if (filters.length === 0) {
+        return DATA;
+    }
 
-    return DATA.then(data => data
-        .filter(datum => Object.entries(filter)
-            .map(function (filterEntry) {
-                const variableName = filterEntry[0];
-                const filterValues = filterEntry[1];
-                return datum[variableName] >= filterValues[0] && datum[variableName] <= filterValues[1];
-            })
-            .every(v => v === true)
-        )
+    const filteredData = DATA.then(data => data
+        .filter(datum => filters.map(f => filter(f, datum)).every(v => v === true))
     );
+
+    return filteredData;
 }
 
 
@@ -216,6 +293,10 @@ function readColorCoding() {
  * Create a scale based on the filtered data and the variable to color
  */
 function createScale(dataPromise, colorCodingVariable) {
+    // TODO: Maybe not create a scale, just the domain, but for each column. The visualizationsConfig parameter for
+    //  updateCharts (eg) could then hold the domain (=min and max value) for each column, and create the which ever
+    //  scales are actually needed.
+
     // Use a linear scale (from white to blue) for numeric variables (we don't have categorical variables, hence linear
     // scales should be fine). Boolean and datetime columns are also just numerical values.
     // However, maybe datetimes need a different scale, d3 supports a d3.scaleTime after all ...
@@ -282,6 +363,8 @@ function updateVisualizations() {
     }
     updateMap(filteredData, mapConfig);
 
+    // TODO: Properly set visualizationsConfig depending on the actual needs of the visualization. See especially the
+    //  comment in function createScale.
     const visualizationsConfig = {
         colorCodingVariableName: colorCodingVariable.id, // The name of the variable that should be used for visual encoding
         colorScalePromise: createColorScale(copyScale(scalePromise)), // The color scale for visual encoding
