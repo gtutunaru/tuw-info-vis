@@ -58,7 +58,7 @@ var VARIABLES_CONFIG = [
     {id: "sqft_lot", name: "Size of lot", type: "numeric", nanValue: undefined,
         interaction: {method: "range", min: 520, max: 1_651_359}},
     {id: "sqft_basement", name: "Size of the basement", type: "numeric", nanValue: undefined, interaction: undefined},
-    {id: "has_baseement", name: "Basement", type: "boolean", nanValue: undefined,
+    {id: "has_basement", name: "Basement", type: "boolean", nanValue: undefined,
         interaction: {method: "choice", choices: [{name: "No", values: [false]}, {name: "Yes", values: [true]}]}},
     {id: "yr_renovated", name: "Year of last renovation", type: "datetime", nanValue: undefined, interaction: undefined},
     {id: "time_since_last_renovation", name: "Time since last renovation", type: "numeric", nanValue: undefined, interaction: undefined},
@@ -67,7 +67,7 @@ var VARIABLES_CONFIG = [
             choices: [{name: "Never", values: [0]}, {name: "10 years or earlier", values: [1]}, {name: "More than ten years", values: [2]}]}},
     {id: "view", name: "View", type: "ordinal", nanValue: undefined,
         interaction: {method: "choice",
-            choices: [{name: "Very bad", values: [0]}, {name: "Bad", values: [1]}, {name: "OK", values: [2]}, {name: "Good", values: [3]}, {name: "4", values: [4]}]}},
+            choices: [{name: "Very bad", values: [0]}, {name: "Bad", values: [1]}, {name: "OK", values: [2]}, {name: "Good", values: [3]}, {name: "Very good", values: [4]}]}},
     {id: "waterfront", name: "Waterfront", type: "boolean", nanValue: undefined,
         interaction: {method: "choice",
             choices: [{name: "No", values: [false]}, {name: "Yes", values: [true]}]}},
@@ -81,22 +81,22 @@ var VARIABLES_CONFIG_MAP = VARIABLES_CONFIG.reduce(function (obj, x) {
 
 
 function initDropdown() {
-    const colorCodingVariables = ["condition",
+    const colorCodingVariables = [
+        "condition",
         "yr_built",
         "grade",
-        "price",
         "bathrooms",
         "bedrooms",
         "floors",
+        "price",
         "date",
         "sqft_above",
         "sqft_living",
         "sqft_lot",
-        "sqft_basement",
         "last_renovation",
         "view",
         "waterfront",
-    ].map(variable_name => VARIABLES_CONFIG_MAP[variable_name]);
+    ].map(variableName => VARIABLES_CONFIG_MAP[variableName]);
     d3.select("#infovis-variable-color-coding")
         .selectAll("option")
         .data(colorCodingVariables)
@@ -105,8 +105,60 @@ function initDropdown() {
         .text(d => d.name)
         .attr("value", d => d.id);
 }
-
 window.addEventListener("load", initDropdown);
+
+
+function initFilters() {
+    const createChoiceFilter = function (variableConfig) {
+        return variableConfig.interaction.choices
+            .map((value, i) =>`<div><label></label><input type="checkbox" id="${variableConfig.id}-${i}" name="${variableConfig.id}" value="${i}" onclick="updateVisualizations();">${value.name}</label></div>`).join("");
+    }
+
+    const createRangeFilter = function (variableConfig) {
+        return `
+            <div class="range-input"><input type="number" id="${variableConfig.id}-min" name="${variableConfig.id}" min="${variableConfig.interaction.min}" max="${variableConfig.interaction.max}" placeholder="${variableConfig.interaction.min}" onblur="updateVisualizations();"></div>
+            <div class="range-input"><input type="number" id="${variableConfig.id}-max" name="${variableConfig.id}" min="${variableConfig.interaction.min}" max="${variableConfig.interaction.max}" placeholder="${variableConfig.interaction.max}" onblur="updateVisualizations();"></div>
+            `;
+    }
+
+    const createFilter = function (variableConfig) {
+        return `
+            <div class="infovis-filter">
+            <fieldset>
+            <div class="title">${variableConfig.name}</div>
+            ${variableConfig.interaction.method === "choice" ? createChoiceFilter(variableConfig) : createRangeFilter(variableConfig)}
+            </div>
+            </fieldset>
+            </div>
+        `;
+    }
+
+    const variableConfigs = [
+        "condition",
+        "price",
+        "yr_built",
+        "grade",
+        "bathrooms",
+        "bedrooms",
+        "floors",
+        // "date",
+        "sqft_above",
+        "sqft_living",
+        "sqft_lot",
+        "has_basement",
+        "last_renovation",
+        "view",
+        "waterfront",
+    ].map(variableName => VARIABLES_CONFIG_MAP[variableName]);
+    d3.select("#infovis-sidebar-body")
+        .selectAll("div")
+        .data(variableConfigs)
+        .enter()
+        .append("div")
+        .attr("class", "infovis-filter")
+        .html(createFilter);
+}
+window.addEventListener("load", initFilters);
 
 
 /*
