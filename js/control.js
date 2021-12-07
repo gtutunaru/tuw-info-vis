@@ -33,7 +33,7 @@ const VARIABLES_CONFIG = [
     {id: "condition", name: "Condition", type: "ordinal", nanValue: undefined,
         interaction: {method: "choice",
             choices: [{name: "Very bad", values: [1]}, {name: "Bad", values: [2]}, {name: "OK", values: [3]}, {name: "Good", values: [4]}, {name: "Very good", values: [5]}]}},
-    {id: "yr_built", name: "Construction year", type: "datetime", nanValue: undefined,
+    {id: "yr_built", name: "Construction year", type: "numeric", nanValue: undefined,
         interaction: {method: "range", min: 1900, max: 2015}},
     {id: "grade", name: "Grade", type: "ordinal", nanValue: undefined,
         interaction: {method: "choice",

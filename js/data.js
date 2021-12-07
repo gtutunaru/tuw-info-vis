@@ -11,10 +11,10 @@ function loadData() {
         function (datum) {
             // Parse datetime columns
             datum.date = parseDateTime(datum.date);
-            datum.yr_built = parseYear(datum.yr_built);
             datum.yr_renovated = "" + datum.yr_renovated === "0" ? undefined : parseYear(datum.yr_renovated);
             // Parse int columns
             datum.id = Number(datum.id);
+            datum.yr_built = Number(datum.yr_built);
             datum.price = Number(datum.price);
             datum.bedrooms = Number(datum.bedrooms);
             datum.bathrooms = Number(datum.bathrooms);
