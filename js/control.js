@@ -33,7 +33,7 @@ const VARIABLES_CONFIG = [
     {id: "condition", name: "Condition", type: "ordinal", nanValue: undefined,
         interaction: {method: "choice",
             choices: [{name: "Very bad", values: [1]}, {name: "Bad", values: [2]}, {name: "OK", values: [3]}, {name: "Good", values: [4]}, {name: "Very good", values: [5]}]}},
-    {id: "yr_built", name: "Construction year", type: "datetime", nanValue: undefined,
+    {id: "yr_built", name: "Construction year", type: "numeric", nanValue: undefined,
         interaction: {method: "range", min: 1900, max: 2015}},
     {id: "grade", name: "Grade", type: "ordinal", nanValue: undefined,
         interaction: {method: "choice",
@@ -64,7 +64,7 @@ const VARIABLES_CONFIG = [
     {id: "time_since_last_renovation", name: "Time since last renovation", type: "numeric", nanValue: undefined, interaction: undefined},
     {id: "last_renovation", name: "Time since last renovation", type: "ordinal", nanValue: undefined,
         interaction: {method: "choice",
-            choices: [{name: "Never", values: [0]}, {name: "10 years or earlier", values: [1]}, {name: "More than ten years", values: [2]}]}},
+            choices: [{name: "Never", values: [0]}, {name: "10 years or more recently", values: [1]}, {name: "More than ten years", values: [2]}]}},
     {id: "view", name: "View", type: "ordinal", nanValue: undefined,
         interaction: {method: "choice",
             choices: [{name: "Very bad", values: [0]}, {name: "Bad", values: [1]}, {name: "OK", values: [2]}, {name: "Good", values: [3]}, {name: "Very good", values: [4]}]}},
@@ -205,8 +205,8 @@ var readRangeFilter = function (variableConfig) {
     const maxValue = variableConfig.interaction.max;
     let fromValue = parseInt($(`input#${variableConfig.id}-min`).val());
     let toValue = parseInt($(`input#${variableConfig.id}-max`).val());
-    const isActive = isNaN(fromValue) && isNaN(toValue);
-    if (isActive) {
+    const isNotActive = isNaN(fromValue) && isNaN(toValue);
+    if (isNotActive) {
         return filter;
     }
 
