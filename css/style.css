@@ -11,6 +11,13 @@ html *
     text-align: left;
 }
 
+#button-zoom {
+  position: absolute;
+  top: 45px;
+  left: 10px;
+  z-index: 10;
+}
+
 .nomargin {
     margin: 0;
 }

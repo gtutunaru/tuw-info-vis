@@ -13,6 +13,7 @@
     <!-- Load libraries -->
     <script type="text/javascript" src="https://code.jquery.com/jquery-1.7.1.min.js"></script>
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/topojson.v1.min.js"></script>
 
     <!-- Load custom scripts -->
     <script src="js/control.js"></script>
@@ -24,7 +25,10 @@
 <body>
 
 <div id="infovis-map">
-    <div>That purple area should be replaced with the map.</div>
+    <div id="btn-zoom">
+        <button id="button-zoom-in"  aria-hidden="true">zoom in</button>
+        <button id="button-zoom-out"  aria-hidden="true">zoom out</button>
+    </div>
 </div>
 
 <div id="infovis-sidebar" class="side-panel left closed">

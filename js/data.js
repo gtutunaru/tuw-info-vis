@@ -4,6 +4,7 @@
 
 
 function loadData() {
+    console.log('reading csv')
     const parseDateTime = d3.timeParse("%Y%m%dT%H%M%S"); // e. g. 20141013T000000
     const parseYear = d3.timeParse("%Y"); // e. g. 2014
     const data = d3.csv(
@@ -43,6 +44,9 @@ function loadData() {
 
             return datum;
         });
+
+        console.log(data)
+
     return data;
 }
 
