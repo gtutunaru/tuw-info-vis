@@ -11,6 +11,11 @@ const projection = d3.geoMercator()
                         .scale(26000)
                         .translate([width / 2,height / 2]);
 
+var geojson;
+var housesLayer;
+var house_data;
+
+
 function initMap() {
     console.log("Initializing the map");
 
@@ -127,12 +132,77 @@ function initMap() {
 */
 }
 
+var popup = L.popup();
+function onMapClick(e) {
+console.log('CLICK')
+    popup
+         .setLatLng(e.latlng)
+         .setContent("You clicked the map at " + e.latlng.toString())
+         .openOn(map);
+}
+function onZoomChange(e) {
+console.log(map.getZoom());
+var bounds = map.getBounds();
+console.log(bounds.getNorth());
+console.log(bounds.getSouth());
+console.log(bounds.getEast());
+console.log(bounds.getWest());
+updateMapElements();
+}
+
+
+function updateMapElements() {
+
+            console.log('updateMapElements')
+            if(geojson) {
+                map.removeLayer(geojson)
+            }
+            if(housesLayer) {
+                map.removeLayer(housesLayer)
+            }
+            if(map.getZoom() < 13) {
+
+                d3.json('data/King_county_zip.geojson')
+                    .then(data => {
+                        geojson = L.geoJson(data, {style: style})
+                        geojson.addTo(map);
+                    })
+            } else {
+                var bounds = map.getBounds();
+                var n = bounds.getNorth();
+                var s = bounds.getSouth();
+                var e = bounds.getEast();
+                var w = bounds.getWest();
+
+                var houses = []
+                //var nr = 0
+                console.log(house_data)
+                for(const d of house_data){
+                    //nr++;
+                    if(d.lat < n && d.lat > s && d.long > w && d.long < e){
+                        console.log('d.lat')
+                        houses.push(L.circle([d.lat, d.long], {
+                                            color: 'red',
+                                            //fillColor: '#f03',
+                                            fillColor: 'red',
+                                            fillOpacity: 1,
+                                            radius: 20
+                                            }));
+                    }
+
+                }
+                housesLayer = L.layerGroup(houses)
+                housesLayer.addTo(map)
+            }
+}
 function initLeaflet(){
     console.log("Initializing the leaflet map");
     map = L.map('infovis-map-l', {
         center: [47.5, -121.8],
         zoom: 10
     });
+
+
 
     var tiles = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
 		maxZoom: 18,
@@ -142,6 +212,13 @@ function initLeaflet(){
 		tileSize: 512,
 		zoomOffset: -1
 	}).addTo(map);
+
+	map.on('click', onMapClick);
+    //map.on('zoom', onZoomChange);
+    map.on('moveend', function() {
+         updateMapElements();
+    });
+
 }
 
 function style(feature) {
@@ -151,8 +228,8 @@ function style(feature) {
         opacity: 1,
         color: 'white',
         dashArray: '3',
-        fillOpacity: 0.7
-    };
+        fillOpacity: 0.5
+    }
 }
 
 var averaged = []
@@ -186,7 +263,7 @@ function updateMap(dataPromise, averagedDataPromise, mapConfig) {
     
     Promise.all([dataPromise, averagedDataPromise, mapConfig.sizeScalePromise, mapConfig.colorScalePromise, mapConfig.colorCodingVariableName])
         .then(function (values) {
-            const data = values[0];
+            house_data = values[0];
             averaged = values[1]
             const sizeScale = values[2];
             colorScale = values[3];
@@ -196,10 +273,13 @@ function updateMap(dataPromise, averagedDataPromise, mapConfig) {
 
             console.log(colorScale(5));
 
-            d3.json('data/King_county_zip.geojson')
-                .then(data => {
-                    L.geoJson(data, {style: style}).addTo(map);
-                })
+
+updateMapElements();
+
+
+
+
+
 
             //console.log(averaged);
 
