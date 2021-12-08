@@ -16,6 +16,7 @@ function togglePanel(selector) {
     } else {
         $(selector).removeClass("closed").addClass("opened");
     }
+    updateVisualizations();
 }
 
 
