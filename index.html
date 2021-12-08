@@ -60,12 +60,16 @@
         <p class="left-align nomargin nopadding">
             <span class="title">Visualizations</span>
             <span class="control">
-                <button onclick="togglePanel('#infovis-visualizations-panel')" class="toggle-button"></button>
+                <button onclick="togglePanel('#infovis-visualizations-panel'); updateVisualizationsIfClosed('#infovis-visualizations-panel')" class="toggle-button"></button>
             </span>
         </p>
     </div>
 
     <div id="infovis-charts" class="body">
+        <div id="infovis-charts-price-histogram" class="chart topleft"></div>
+        <div id="infovis-charts-livingarea-histogram" class="chart topright"></div>
+        <div id="infovis-charts-lotsize-histogram" class="chart bottomleft"></div>
+        <div id="infovis-charts-constructionyear-histogram" class="chart bottomright"></div>
         <!-- TODO: Add a visualization -->
     </div>
 </div>

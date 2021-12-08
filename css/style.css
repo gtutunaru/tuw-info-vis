@@ -209,3 +209,45 @@ html *
 .infovis-filter .range-input {
     margin-bottom: 0.2em;
 }
+
+/**
+ * Charts
+ */
+
+
+#infovis-charts {
+    display: flex;
+    flex-flow: row wrap;
+}
+
+.chart {
+    width: 48%;
+    min-width: 48%;
+    max-width: 48%;
+    height: 48%;
+    min-height: 48%;
+    max-height: 48%;
+    flex: 1 1 48%;
+}
+
+.side-panel.closed .chart {
+    display: none;
+}
+
+/*
+.chart.topleft {
+    flex: 1 1 45%;
+}
+
+.chart.topright {
+    flex: 1 1 45%;
+}
+
+.chart.bottomleft {
+    flex: 1 1 45%;
+}
+
+.chart.bottomright {
+    flex: 1 1 45%;
+}
+*/

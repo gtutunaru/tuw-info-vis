@@ -99,6 +99,12 @@ const FILTER_VARIABLE_CONFIGS = [
 ].map(variableName => VARIABLES_CONFIG_MAP[variableName]);
 
 
+const VARIABLE_TO_NAME = VARIABLES_CONFIG.reduce(function (obj, x) {
+    obj[x.id] = x.name;
+    return obj;
+}, {});
+
+
 function initDropdown() {
     const colorCodingVariables = [
         "price",
@@ -435,6 +441,7 @@ function updateVisualizations() {
         colorCodingVariableName: colorCodingVariable.id, // The name of the variable that should be used for visual encoding
         colorScalePromise: createColorScale(copyScale(scalePromise)), // The color scale for visual encoding
         sizeScalePromise: createSizeScale(copyScale(scalePromise)), // The size scale for visual encoding
+        titles: VARIABLE_TO_NAME,
     }
     updateCharts(filteredData, visualizationsConfig);
 }

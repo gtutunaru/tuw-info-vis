@@ -1,19 +1,20 @@
 # Setup
 
 * Start a server (this could be easily done with the help of the extension
-  'Live Server' for VSCode).
-* Open `index.html` in a browser.
+  'Live Server' for VSCode, or calling `python3 -m http.server`)
+* Open `index.html` in a browser (in case of `http.server` open
+  [http://localhost:8000/index.html](http://localhost:8000/index.html).
 
 
-# How it works
+# Features
 
-When the page is loaded, following happens atm:
-
-* Load all the control-functions from `js/control.js`. This includes e.g.
-  functionality to open and close the sidebar, filter the data, or to call the
-  functions that should update the visualizations. Also load the stylesheet and 
-  the libraries (jQuery and d3).
-* Load the data
-* When data loading finished, then `updateVisualizations` function is called
-* This function reads the current filter-settings, filters the data based on 
-  those settings, and updates the map.
+* Show some properties aggregated per county (heatmap of the counties)
+* Zoom in into the map to see details - the houses appear
+* Filter the houses (open the filter panel possible using the button on the top
+  left) - the map only shows the selected houses
+* Change the variable color the houses (in the filter-panel on the bottom)
+* Show some histograms (e.g. price or square feet of the living area) of the
+  selected houses by clicking on the button in the top right corner). Note:
+  the visualizations are not always properly drawn, just select and deselect
+  a checkbox of the filter-panel, or blur and unblur an input in the same
+  panel to trigger a redrawing.
