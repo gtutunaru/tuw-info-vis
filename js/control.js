@@ -341,7 +341,7 @@ function filterData(filters) {
 
          const dictionary = averaged.reduce((a,x) => ({...a, [x.zipcode]: x}), {})
 
-         return averaged;
+         return dictionary;
     });
 
     return averagedByZipCode;
@@ -368,14 +368,20 @@ function createScale(dataPromise, colorCodingVariable) {
     // scales should be fine). Boolean and datetime columns are also just numerical values.
     // However, maybe datetimes need a different scale, d3 supports a d3.scaleTime after all ...
     return dataPromise
-        .then(data => data
-            .map(datum => datum[colorCodingVariable.id])
+        .then(data => {
+            array = []
+            for (key in data)
+                array.push(data[key])
+            return array.map(datum => datum[colorCodingVariable.id])
             .filter(element => element !== colorCodingVariable.nanValue)
-        )
+        })
         .then(dataColumn => {
-            console.log(dataColumn);
-            return d3.scaleTime()
-            .domain([d3.min(dataColumn), d3.max(dataColumn)])
+            if (d3.min(dataColumn)===d3.max(dataColumn))
+                return d3.scaleLinear()
+                    .domain([d3.min(dataColumn) - 1, d3.max(dataColumn)]) //if min = max there are different colors for the same variable
+            else 
+                return d3.scaleLinear()
+                    .domain([d3.min(dataColumn), d3.max(dataColumn)])
         });
 }
 
@@ -385,7 +391,7 @@ function createScale(dataPromise, colorCodingVariable) {
  */
 function createColorScale(scalePromise) {
     return scalePromise.then(scale => scale
-        .range(["rgb(255,255,255)", "rgb(0,0,255)"]) // TODO: Insert proper values
+        .range(["#f1eef6", "#0000FF"]) // TODO: Insert proper values
         .unknown("rgb(204,204,204)")
     );
 }

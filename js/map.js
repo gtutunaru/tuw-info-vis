@@ -1,11 +1,20 @@
 /**
  * Contains all the code to setup and modify the map
  */
-const width = 1200;
-const height = 900;
+
+// const width = 1200;
+// const height = 900;
 
 var map;
+var geojson;
+var info;
 
+var averaged = {}
+var colorScale = function(){};
+var sizeScale = function(){};
+var colorCodingVariableName = 'price';
+
+/*
 const projection = d3.geoMercator()
                         .center([-121.5,47.2])
                         .scale(26000)
@@ -27,11 +36,11 @@ function initMap() {
     const g = svg.append('g')
                  .attr('id','g-elem');
 
-    /*g.append("rect")
+    g.append("rect")
      .attr("class", "background")
      .attr("fill", "#cacaca")
      .attr("width", width)
-     .attr("height", height);*/
+     .attr("height", height);
 
     d3.json('data/King_county_zip.geojson')
         .then(data => {
@@ -42,17 +51,17 @@ function initMap() {
                          .selectAll("p")
                          .data(data);
             ps.enter().append("p")
-                      .merge(ps)*/
+                      .merge(ps)
             //svg.append("path").attr("g", path(data));
 
-           /* svg.append('g')
+            svg.append('g')
                .selectAll('path')
                .data(data.features)
                .enter()
                .append('path')
                .attr('d', function(eachFeature){
                return path(eachFeature)
-               }).attr('fill','black')*/
+               }).attr('fill','black')
             //svg.append("g")
             g.selectAll("path")
              .data(data.features)
@@ -88,8 +97,8 @@ function initMap() {
     /*d3.csv("data/kc_house_data.csv").then(function(data) {
         console.log('SUP')
         console.log(data)
-    });*/
-/*
+    });
+
     var zoom = d3.zoom()
         .scaleExtent([1, 8])
         .on('zoom', function() {
@@ -98,7 +107,7 @@ function initMap() {
         });
 
     svg.call(zoom);
-    */
+    
     var zoom = d3.zoom()
           .scaleExtent([1, 8])
           .on('zoom', function(event) {
@@ -129,6 +138,8 @@ function initMap() {
     d3.json("data/King_county_zip.geojson", function(err, geojson) {
     console.log('HERE2')
     svg.append("path").attr("d", path(geojson));})
+
+}
 */
 }
 
@@ -213,6 +224,28 @@ function initLeaflet(){
 		zoomOffset: -1
 	}).addTo(map);
 
+    L.control.scale().addTo(map);
+
+    info = L.control();
+
+    info.onAdd = function (map) {
+        this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
+        this.update();
+        return this._div;
+    };
+
+    // method that we will use to update the control based on feature properties passed
+    info.update = function (props) {
+        this._div.innerHTML = '<h4>House Sales in King County</h4>' +  (props ?
+            '<b>Zip-code ' + props.ZIP + '</b><br /> Average ' + colorCodingVariableName + ' : ' + 
+                (averaged[props.ZIP] ? new Intl.NumberFormat('de-DE').format((Math.round(averaged[props.ZIP][colorCodingVariableName] * 100) / 100).toFixed(2)) : 'no data')
+            : 'Hover over a state');
+    };
+
+    info.addTo(map);
+
+    map.on('zoomend', updateVisualizations);
+
 	map.on('click', onMapClick);
     //map.on('zoom', onZoomChange);
     map.on('moveend', function() {
@@ -232,15 +265,44 @@ function style(feature) {
     }
 }
 
-var averaged = []
-var colorScale = function(){};
+function highlightFeature(e) {
+    var layer = e.target;
+
+    layer.setStyle({
+        weight: 5,
+        color: '#666',
+        dashArray: '',
+        fillOpacity: 0.7
+    });
+
+    if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+        layer.bringToFront();
+    }
+
+    info.update(layer.feature.properties);
+}
+
+function resetHighlight(e) {
+    geojson.resetStyle(e.target);
+    info.update();
+}
+
+function zoomToFeature(e) {
+    map.fitBounds(e.target.getBounds());
+}
+
+function onEachFeature(feature, layer) {
+    layer.on({
+        mouseover: highlightFeature,
+        mouseout: resetHighlight,
+        click: zoomToFeature
+    });
+}
 
 function getColor(zipCode) {
-    value = averaged.filter(x => x.zipcode === zipCode)[0]
-    if (!value)
+    if (!averaged[zipCode])
         return '#FFFFFF00';
-    console.log(value.price, colorScale(value['price']));
-    return colorScale(value.price);
+    return colorScale(averaged[zipCode][colorCodingVariableName]);
 }
 
 //window.addEventListener("load", initMap);
@@ -265,24 +327,30 @@ function updateMap(dataPromise, averagedDataPromise, mapConfig) {
         .then(function (values) {
             house_data = values[0];
             averaged = values[1]
-            const sizeScale = values[2];
+            sizeScale = values[2];
             colorScale = values[3];
-            const colorCodingVariableName = values[4];
+            colorCodingVariableName = values[4];
 
             console.log(colorScale, sizeScale, colorCodingVariableName);
 
-            console.log(colorScale(5));
+            if (map)
+                map.eachLayer(function (layer) {
+                    if (!!layer.toGeoJSON) {
+                        map.removeLayer(layer);
+                    }
+                });
+            d3.json('data/King_county_zip.geojson')
+                .then(data => {
+                    geojson = L.geoJson(data, 
+                        {
+                            style: style,
+                            onEachFeature: onEachFeature
+                        }
+                    )
+                    .addTo(map);
+                })
 
-
-updateMapElements();
-
-
-
-
-
-
-            //console.log(averaged);
-
+            updateMapElements();
             
             /*
             const ps = d3
@@ -300,6 +368,7 @@ updateMapElements();
 */
 
 
+            /*
             const g = d3.select('#g-elem')
             console.log(g)
             g.selectAll("circle").remove()
@@ -316,6 +385,7 @@ updateMapElements();
                 .attr("r", 1)
                 .style("fill", "red")
                 .attr('transform', g.selectAll('path').attr('transform'));
+            */
         });
 
     console.log("Updating map done");
