@@ -3,7 +3,7 @@
 * Start a server (this could be easily done with the help of the extension
   'Live Server' for VSCode, or calling `python3 -m http.server`)
 * Open `index.html` in a browser (in case of `http.server` open
-  [http://localhost:8000/index.html](http://localhost:8000/index.html).
+  [http://localhost:8000/index.html](http://localhost:8000/index.html)).
 
 
 # Features
