@@ -53,6 +53,7 @@ html *
     height: calc(100vh - 100px); /* 50px space on top and bottom */
 }
 
+.side-panel.closed svg,
 .side-panel.closed {
     background-color: transparent;
     height: 25px; /* The button has a height of 25px, don't know why  */
@@ -199,3 +200,41 @@ html *
 .infovis-filter .range-input {
     margin-bottom: 0.2em;
 }
+
+/**
+ * Charts
+ */
+
+
+#infovis-charts {
+    display: flex;
+    flex-flow: row wrap;
+}
+
+.chart {
+    width: 48%;
+    min-width: 48%;
+    max-width: 48%;
+    height: 48%;
+    min-height: 48%;
+    max-height: 48%;
+    flex: 1 1 48%;
+}
+
+/*
+.chart.topleft {
+    flex: 1 1 45%;
+}
+
+.chart.topright {
+    flex: 1 1 45%;
+}
+
+.chart.bottomleft {
+    flex: 1 1 45%;
+}
+
+.chart.bottomright {
+    flex: 1 1 45%;
+}
+*/
