@@ -279,6 +279,73 @@ function filterData(filters) {
     return filteredData;
 }
 
+/**
+ * Calculate the average over the zip code
+ *
+ */
+ function averageByZipCode(filteredData) {
+    if (filteredData.length === 0) {
+        return {};
+    }
+
+    const averagedByZipCode = filteredData.then( data => {
+        const reduced = data.reduce(function(m, d){
+            if(!m[d.zipcode]){
+              m[d.zipcode] = {...d, count: 1};
+              return m;
+            }
+            m[d.zipcode].yr_built += d.yr_built;
+            if (d.yr_renovated)
+                m[d.zipcode].yr_renovated += d.yr_renovated;
+            m[d.zipcode].price += d.price;
+            m[d.zipcode].bedrooms += d.bedrooms;
+            m[d.zipcode].bathrooms += d.bathrooms;
+            m[d.zipcode].sqft_living += d.sqft_living;
+            m[d.zipcode].sqft_lot += d.sqft_lot;
+            m[d.zipcode].floors += d.floors;
+            m[d.zipcode].view += d.view;
+            m[d.zipcode].condition += d.condition;
+            m[d.zipcode].grade += d.grade;
+            m[d.zipcode].sqft_above += d.sqft_above;
+            m[d.zipcode].sqft_basement += d.sqft_basement;
+            m[d.zipcode].sqft_living15 += d.sqft_living15;
+            m[d.zipcode].sqft_lot15 += d.sqft_lot15;
+            m[d.zipcode].waterfront += d.waterfront;
+            m[d.zipcode].count += 1;
+            return m;
+         },{});
+         
+         // Create new array from grouped data and compute the average
+         const averaged =  Object.keys(reduced).map(function(k){
+             const item  = reduced[k];
+             return {
+                 zipcode:       item.zipcode,
+                 yr_built:      item.yr_built/item.count,
+                 yr_renovated:  item.yr_renovated/item.count,
+                 price:         item.price/item.count,
+                 bedrooms:      item.bedrooms/item.count,
+                 bathrooms:     item.bathrooms/item.count,
+                 sqft_living:   item.sqft_living/item.count,
+                 sqft_lot:      item.sqft_lot/item.count,
+                 floors:        item.floors/item.count,
+                 view:          item.view/item.count,
+                 condition:     item.condition/item.count,
+                 grade:         item.grade/item.count,
+                 sqft_above:    item.sqft_above/item.count,
+                 sqft_basement: item.sqft_basement/item.count,
+                 sqft_living15: item.sqft_living15/item.count,
+                 sqft_lot15:    item.sqft_lot15/item.count,
+                 waterfront:    item.waterfront/item.count
+             }
+         })
+
+         const dictionary = averaged.reduce((a,x) => ({...a, [x.zipcode]: x}), {})
+
+         return averaged;
+    });
+
+    return averagedByZipCode;
+}
 
 /**
  * Read which variable should be encoded
@@ -305,9 +372,11 @@ function createScale(dataPromise, colorCodingVariable) {
             .map(datum => datum[colorCodingVariable.id])
             .filter(element => element !== colorCodingVariable.nanValue)
         )
-        .then(dataColumn => d3.scaleTime()
+        .then(dataColumn => {
+            console.log(dataColumn);
+            return d3.scaleTime()
             .domain([d3.min(dataColumn), d3.max(dataColumn)])
-        );
+        });
 }
 
 
@@ -353,15 +422,16 @@ function copyScale(scalePromise) {
 function updateVisualizations() {
     const filters = readFilters();
     const filteredData = filterData(filters);
+    const averagedByZipCode = averageByZipCode(filteredData);
     const colorCodingVariable = readColorCoding();
-    const scalePromise = createScale(filteredData, colorCodingVariable);
+    const scalePromise = createScale(averagedByZipCode, colorCodingVariable);
 
     const mapConfig = {
         colorCodingVariableName: colorCodingVariable.id, // The name of the variable that should be used for visual encoding
         colorScalePromise: createColorScale(copyScale(scalePromise)), // The color scale for visual encoding
         sizeScalePromise: createSizeScale(copyScale(scalePromise)), // The size scale for visual encoding
     }
-    updateMap(filteredData, mapConfig);
+    updateMap(filteredData, averagedByZipCode, mapConfig);
 
     // TODO: Properly set visualizationsConfig depending on the actual needs of the visualization. See especially the
     //  comment in function createScale.

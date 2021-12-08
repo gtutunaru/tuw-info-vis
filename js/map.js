@@ -1,21 +1,20 @@
 /**
  * Contains all the code to setup and modify the map
  */
-    const width = 1200;
-    const height = 900;
+const width = 1200;
+const height = 900;
 
-        const projection = d3.geoMercator()
-                             .center([-121.5,47.2])
-                             .scale(26000)
-                             .translate([width / 2,height / 2]);
+var map;
+
+const projection = d3.geoMercator()
+                        .center([-121.5,47.2])
+                        .scale(26000)
+                        .translate([width / 2,height / 2]);
 
 function initMap() {
     console.log("Initializing the map");
 
-
-
     const svg = d3.select('#infovis-map').append('svg').attr('width', '80%').attr('height', '90%');
-
 
 
     var path = d3.geoPath(projection);
@@ -23,14 +22,11 @@ function initMap() {
     const g = svg.append('g')
                  .attr('id','g-elem');
 
-    g.append("rect")
+    /*g.append("rect")
      .attr("class", "background")
      .attr("fill", "#cacaca")
      .attr("width", width)
-     .attr("height", height);
-
-
-
+     .attr("height", height);*/
 
     d3.json('data/King_county_zip.geojson')
         .then(data => {
@@ -53,8 +49,7 @@ function initMap() {
                return path(eachFeature)
                }).attr('fill','black')*/
             //svg.append("g")
-            g
-             .selectAll("path")
+            g.selectAll("path")
              .data(data.features)
              .enter()
              .append("path")
@@ -67,8 +62,7 @@ function initMap() {
 
 
 
-            g
-             .append("circle")
+            g.append("circle")
              .style("opacity", .4)
              .attr("cx", 200)
              .attr("cy", 50)
@@ -76,23 +70,20 @@ function initMap() {
 
              g.append("text")
              .style("opacity", .5)
-                          .attr("x", 200)
-                          .attr("y", 55)
-                          .attr("text-anchor", "middle")
-                          .style("font-size", "20px")
-                          .style("fill", "white")
-
-                          .text("CIRCLE");
+            .attr("x", 200)
+            .attr("y", 55)
+            .attr("text-anchor", "middle")
+            .style("font-size", "20px")
+            .style("fill", "white")
+            .text("CIRCLE");
 
         });
 
 
-                     d3.csv("data/kc_house_data.csv").then(function(data) {
-                     console.log('SUP')
-                     console.log(data)
-
-
-                     });
+    /*d3.csv("data/kc_house_data.csv").then(function(data) {
+        console.log('SUP')
+        console.log(data)
+    });*/
 /*
     var zoom = d3.zoom()
         .scaleExtent([1, 8])
@@ -136,7 +127,47 @@ function initMap() {
 */
 }
 
-window.addEventListener("load", initMap);
+function initLeaflet(){
+    console.log("Initializing the leaflet map");
+    map = L.map('infovis-map-l', {
+        center: [47.5, -121.8],
+        zoom: 10
+    });
+
+    var tiles = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+		maxZoom: 18,
+		attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, ' +
+			'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+		id: 'mapbox/streets-v11',
+		tileSize: 512,
+		zoomOffset: -1
+	}).addTo(map);
+}
+
+function style(feature) {
+    return {
+        fillColor: getColor(feature.properties.ZIP),
+        weight: 2,
+        opacity: 1,
+        color: 'white',
+        dashArray: '3',
+        fillOpacity: 0.7
+    };
+}
+
+var averaged = []
+var colorScale = function(){};
+
+function getColor(zipCode) {
+    value = averaged.filter(x => x.zipcode === zipCode)[0]
+    if (!value)
+        return '#FFFFFF00';
+    console.log(value.price, colorScale(value['price']));
+    return colorScale(value.price);
+}
+
+//window.addEventListener("load", initMap);
+window.addEventListener("load", initLeaflet);
 
 
 /**
@@ -144,19 +175,35 @@ window.addEventListener("load", initMap);
  *
  * @param dataPromise Filtered data as promise (as the global DATA variable, just filtered based on the criteria the
  * user selected)
+ * @param averagedDataPromise Average by zip code of the filtered data as promise
  * @param mapConfig An object holding various configs, see {@link updateVisualizations} for a detailed description.
  */
-function updateMap(dataPromise, mapConfig) {
+function updateMap(dataPromise, averagedDataPromise, mapConfig) {
     // TODO: Implement this function.
     console.log("Updating map");
 
 
-    const colorCodingVariableName = mapConfig.colorCodingVariableName
-    Promise.all([dataPromise, mapConfig.sizeScalePromise, mapConfig.colorScalePromise])
+    
+    Promise.all([dataPromise, averagedDataPromise, mapConfig.sizeScalePromise, mapConfig.colorScalePromise, mapConfig.colorCodingVariableName])
         .then(function (values) {
             const data = values[0];
-            const sizeScale = values[1];
-            const colorScale = values[2];
+            averaged = values[1]
+            const sizeScale = values[2];
+            colorScale = values[3];
+            const colorCodingVariableName = values[4];
+
+            console.log(colorScale, sizeScale, colorCodingVariableName);
+
+            console.log(colorScale(5));
+
+            d3.json('data/King_county_zip.geojson')
+                .then(data => {
+                    L.geoJson(data, {style: style}).addTo(map);
+                })
+
+            //console.log(averaged);
+
+            
             /*
             const ps = d3
                 .select("#infovis-map")
@@ -173,23 +220,22 @@ function updateMap(dataPromise, mapConfig) {
 */
 
 
-                const g = d3.select('#g-elem')
-                console.log(g)
-                g.selectAll("circle").remove()
-                g.selectAll("circle")
-                                                .data(data)
-                                                .enter()
-
-                                                .append("circle")
-                                                .attr("cx", function(d) {
-                                                        return projection([Number(d.long), Number(d.lat)])[0];
-                                                })
-                                                .attr("cy", function(d) {
-                                                        return projection([Number(d.long), Number(d.lat)])[1];
-                                                })
-                                                .attr("r", 1)
-                                                .style("fill", "red")
-                                                .attr('transform', g.selectAll('path').attr('transform'));
+            const g = d3.select('#g-elem')
+            console.log(g)
+            g.selectAll("circle").remove()
+            g.selectAll("circle")
+                .data(data)
+                .enter()
+                .append("circle")
+                .attr("cx", function(d) {
+                        return projection([Number(d.long), Number(d.lat)])[0];
+                })
+                .attr("cy", function(d) {
+                        return projection([Number(d.long), Number(d.lat)])[1];
+                })
+                .attr("r", 1)
+                .style("fill", "red")
+                .attr('transform', g.selectAll('path').attr('transform'));
         });
 
     console.log("Updating map done");

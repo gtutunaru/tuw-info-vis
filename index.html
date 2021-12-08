@@ -9,11 +9,13 @@
     <link href='http://fonts.googleapis.com/css?family=Lato&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.13.0/css/all.css">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin="" />
 
     <!-- Load libraries -->
     <script type="text/javascript" src="https://code.jquery.com/jquery-1.7.1.min.js"></script>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://d3js.org/topojson.v1.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
 
     <!-- Load custom scripts -->
     <script src="js/control.js"></script>
@@ -23,12 +25,16 @@
 
 </head>
 <body>
-
+<!--
 <div id="infovis-map">
     <div id="btn-zoom">
         <button id="button-zoom-in"  aria-hidden="true">zoom in</button>
         <button id="button-zoom-out"  aria-hidden="true">zoom out</button>
     </div>
+</div>
+-->
+
+<div id="infovis-map-l">
 </div>
 
 <div id="infovis-sidebar" class="side-panel left closed">
