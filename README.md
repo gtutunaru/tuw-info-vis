@@ -12,6 +12,7 @@
 * Zoom in into the map to see details - the houses appear
 * Filter the houses (open the filter panel possible using the button on the top
   left) - the map only shows the selected houses
+* Click on a house to see it's details on the top right corner
 * Change the variable color the houses (in the filter-panel on the bottom)
 * Show some histograms (e.g. price or square feet of the living area) of the
   selected houses by clicking on the button in the top right corner). Note:
