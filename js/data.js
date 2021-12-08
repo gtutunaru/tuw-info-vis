@@ -5,16 +5,19 @@
 
 function loadData() {
     const parseDateTime = d3.timeParse("%Y%m%dT%H%M%S"); // e. g. 20141013T000000
-    const parseYear = d3.timeParse("%Y"); // e. g. 2014
+    //const parseYear = d3.timeParse("%Y"); // e. g. 2014
+    var currentTime = new Date();
     const data = d3.csv(
         "data/kc_house_data.csv",
         function (datum) {
             // Parse datetime columns
             datum.date = parseDateTime(datum.date);
-            datum.yr_renovated = "" + datum.yr_renovated === "0" ? undefined : parseYear(datum.yr_renovated);
+            //datum.yr_built = parseYear(datum.yr_built);
+            datum.yr_built = parseInt(datum.yr_built);
+            //datum.yr_renovated = "" + datum.yr_renovated === "0" ? undefined : parseYear(datum.yr_renovated);
+            datum.yr_renovated = "" + datum.yr_renovated === "0" ? undefined : parseInt(datum.yr_renovated);
             // Parse int columns
             datum.id = Number(datum.id);
-            datum.yr_built = Number(datum.yr_built);
             datum.price = Number(datum.price);
             datum.bedrooms = Number(datum.bedrooms);
             datum.bathrooms = Number(datum.bathrooms);
@@ -36,9 +39,9 @@ function loadData() {
             datum.long = Number(datum.long);
 
             // Auxiliary columns
-            const yearsSinceLastRenovation = datum.yr_built - datum.yr_renovated;
-            datum.time_since_last_renovation = yearsSinceLastRenovation <= 0 ? 0 : yearsSinceLastRenovation;
-            datum.last_renovation = yearsSinceLastRenovation === 0 ? 0 : yearsSinceLastRenovation <= 10 ? 1 : 2;
+            const yearsSinceLastRenovation = datum.yr_renovated ? currentTime.getFullYear() - datum.yr_renovated : undefined;
+            //datum.time_since_last_renovation = yearsSinceLastRenovation <= 0 ? 0 : yearsSinceLastRenovation;
+            datum.last_renovation = yearsSinceLastRenovation === undefined ? 0 : yearsSinceLastRenovation <= 10 ? 1 : 2;
             datum.has_basement = datum.sqft_basement > 0;
 
             return datum;
