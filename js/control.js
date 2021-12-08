@@ -101,20 +101,20 @@ const FILTER_VARIABLE_CONFIGS = [
 
 function initDropdown() {
     const colorCodingVariables = [
+        "price",
         "condition",
         "yr_built",
         "grade",
         "bathrooms",
         "bedrooms",
         "floors",
-        "price",
-        "date",
+        //"date",
         "sqft_above",
         "sqft_living",
         "sqft_lot",
-        "last_renovation",
+        //"last_renovation",
         "view",
-        "waterfront",
+        //"waterfront",
     ].map(variableName => VARIABLES_CONFIG_MAP[variableName]);
     d3.select("#infovis-variable-color-coding")
         .selectAll("option")
@@ -280,8 +280,7 @@ function filterData(filters) {
 }
 
 /**
- * Calculate the average over the zip code
- *
+ * Calculate the average over the zip codes
  */
  function averageByZipCode(filteredData) {
     if (filteredData.length === 0) {
@@ -339,9 +338,10 @@ function filterData(filters) {
              }
          })
 
-         const dictionary = averaged.reduce((a,x) => ({...a, [x.zipcode]: x}), {})
+        // create dictionary for faster value retrival for a specific zip code
+        const dictionary = averaged.reduce((a,x) => ({...a, [x.zipcode]: x}), {})
 
-         return dictionary;
+        return dictionary;
     });
 
     return averagedByZipCode;
@@ -360,29 +360,20 @@ function readColorCoding() {
  * Create a scale based on the filtered data and the variable to color
  */
 function createScale(dataPromise, colorCodingVariable) {
-    // TODO: Maybe not create a scale, just the domain, but for each column. The visualizationsConfig parameter for
-    //  updateCharts (eg) could then hold the domain (=min and max value) for each column, and create the which ever
-    //  scales are actually needed.
-
     // Use a linear scale (from white to blue) for numeric variables (we don't have categorical variables, hence linear
     // scales should be fine). Boolean and datetime columns are also just numerical values.
-    // However, maybe datetimes need a different scale, d3 supports a d3.scaleTime after all ...
     return dataPromise
         .then(data => {
             array = []
+            //transform dict to array
             for (key in data)
                 array.push(data[key])
             return array.map(datum => datum[colorCodingVariable.id])
-            .filter(element => element !== colorCodingVariable.nanValue)
+                        .filter(element => element !== colorCodingVariable.nanValue)
         })
-        .then(dataColumn => {
-            if (d3.min(dataColumn)===d3.max(dataColumn))
-                return d3.scaleLinear()
-                    .domain([d3.min(dataColumn) - 1, d3.max(dataColumn)]) //if min = max there are different colors for the same variable
-            else 
-                return d3.scaleLinear()
-                    .domain([d3.min(dataColumn), d3.max(dataColumn)])
-        });
+        .then(dataColumn => d3.scaleLinear()
+                            .domain([d3.min(dataColumn), d3.max(dataColumn)])
+            );
 }
 
 
@@ -391,18 +382,18 @@ function createScale(dataPromise, colorCodingVariable) {
  */
 function createColorScale(scalePromise) {
     return scalePromise.then(scale => scale
-        .range(["#f1eef6", "#0000FF"]) // TODO: Insert proper values
+        .range(["#ffeda0", "#800026"])
         .unknown("rgb(204,204,204)")
     );
 }
 
 
 /**
- * Create a size scale based on a scale
+ * Create a size scale based on a scale - Not used in the end
  */
 function createSizeScale(scalePromise) {
     return scalePromise.then(scale => scale
-        .range([5, 30]) // TODO: Insert proper values
+        .range([5, 30])
         .unknown(3)
     );
 }
@@ -417,11 +408,6 @@ function copyScale(scalePromise) {
 }
 
 
-/*
- * Update visualizations
- */
-
-
 /**
  * Update the views (map etc.)
  */
@@ -430,7 +416,11 @@ function updateVisualizations() {
     const filteredData = filterData(filters);
     const averagedByZipCode = averageByZipCode(filteredData);
     const colorCodingVariable = readColorCoding();
-    const scalePromise = createScale(averagedByZipCode, colorCodingVariable);
+    var scalePromise;
+    if (mapZoomed())
+       scalePromise = createScale(filteredData, colorCodingVariable);
+    else
+        scalePromise = createScale(averagedByZipCode, colorCodingVariable);
 
     const mapConfig = {
         colorCodingVariableName: colorCodingVariable.id, // The name of the variable that should be used for visual encoding
