@@ -33,7 +33,7 @@ const VARIABLES_CONFIG = [
     {id: "condition", name: "Condition", type: "ordinal", nanValue: undefined,
         interaction: {method: "choice",
             choices: [{name: "Very bad", values: [1]}, {name: "Bad", values: [2]}, {name: "OK", values: [3]}, {name: "Good", values: [4]}, {name: "Very good", values: [5]}]}},
-    {id: "yr_built", name: "Construction year", type: "datetime", nanValue: undefined,
+    {id: "yr_built", name: "Construction year", type: "numeric", nanValue: undefined,
         interaction: {method: "range", min: 1900, max: 2015}},
     {id: "grade", name: "Grade", type: "ordinal", nanValue: undefined,
         interaction: {method: "choice",
@@ -64,7 +64,7 @@ const VARIABLES_CONFIG = [
     {id: "time_since_last_renovation", name: "Time since last renovation", type: "numeric", nanValue: undefined, interaction: undefined},
     {id: "last_renovation", name: "Time since last renovation", type: "ordinal", nanValue: undefined,
         interaction: {method: "choice",
-            choices: [{name: "Never", values: [0]}, {name: "10 years or earlier", values: [1]}, {name: "More than ten years", values: [2]}]}},
+            choices: [{name: "Never", values: [0]}, {name: "10 years or more recently", values: [1]}, {name: "More than ten years", values: [2]}]}},
     {id: "view", name: "View", type: "ordinal", nanValue: undefined,
         interaction: {method: "choice",
             choices: [{name: "Very bad", values: [0]}, {name: "Bad", values: [1]}, {name: "OK", values: [2]}, {name: "Good", values: [3]}, {name: "Very good", values: [4]}]}},
@@ -101,20 +101,20 @@ const FILTER_VARIABLE_CONFIGS = [
 
 function initDropdown() {
     const colorCodingVariables = [
+        "price",
         "condition",
         "yr_built",
         "grade",
         "bathrooms",
         "bedrooms",
         "floors",
-        "price",
-        "date",
+        //"date",
         "sqft_above",
         "sqft_living",
         "sqft_lot",
-        "last_renovation",
+        //"last_renovation",
         "view",
-        "waterfront",
+        //"waterfront",
     ].map(variableName => VARIABLES_CONFIG_MAP[variableName]);
     d3.select("#infovis-variable-color-coding")
         .selectAll("option")
@@ -205,8 +205,8 @@ var readRangeFilter = function (variableConfig) {
     const maxValue = variableConfig.interaction.max;
     let fromValue = parseInt($(`input#${variableConfig.id}-min`).val());
     let toValue = parseInt($(`input#${variableConfig.id}-max`).val());
-    const isActive = isNaN(fromValue) && isNaN(toValue);
-    if (isActive) {
+    const isNotActive = isNaN(fromValue) && isNaN(toValue);
+    if (isNotActive) {
         return filter;
     }
 
@@ -279,6 +279,73 @@ function filterData(filters) {
     return filteredData;
 }
 
+/**
+ * Calculate the average over the zip codes
+ */
+ function averageByZipCode(filteredData) {
+    if (filteredData.length === 0) {
+        return {};
+    }
+
+    const averagedByZipCode = filteredData.then( data => {
+        const reduced = data.reduce(function(m, d){
+            if(!m[d.zipcode]){
+              m[d.zipcode] = {...d, count: 1};
+              return m;
+            }
+            m[d.zipcode].yr_built += d.yr_built;
+            if (d.yr_renovated)
+                m[d.zipcode].yr_renovated += d.yr_renovated;
+            m[d.zipcode].price += d.price;
+            m[d.zipcode].bedrooms += d.bedrooms;
+            m[d.zipcode].bathrooms += d.bathrooms;
+            m[d.zipcode].sqft_living += d.sqft_living;
+            m[d.zipcode].sqft_lot += d.sqft_lot;
+            m[d.zipcode].floors += d.floors;
+            m[d.zipcode].view += d.view;
+            m[d.zipcode].condition += d.condition;
+            m[d.zipcode].grade += d.grade;
+            m[d.zipcode].sqft_above += d.sqft_above;
+            m[d.zipcode].sqft_basement += d.sqft_basement;
+            m[d.zipcode].sqft_living15 += d.sqft_living15;
+            m[d.zipcode].sqft_lot15 += d.sqft_lot15;
+            m[d.zipcode].waterfront += d.waterfront;
+            m[d.zipcode].count += 1;
+            return m;
+         },{});
+         
+         // Create new array from grouped data and compute the average
+         const averaged =  Object.keys(reduced).map(function(k){
+             const item  = reduced[k];
+             return {
+                 zipcode:       item.zipcode,
+                 yr_built:      item.yr_built/item.count,
+                 yr_renovated:  item.yr_renovated/item.count,
+                 price:         item.price/item.count,
+                 bedrooms:      item.bedrooms/item.count,
+                 bathrooms:     item.bathrooms/item.count,
+                 sqft_living:   item.sqft_living/item.count,
+                 sqft_lot:      item.sqft_lot/item.count,
+                 floors:        item.floors/item.count,
+                 view:          item.view/item.count,
+                 condition:     item.condition/item.count,
+                 grade:         item.grade/item.count,
+                 sqft_above:    item.sqft_above/item.count,
+                 sqft_basement: item.sqft_basement/item.count,
+                 sqft_living15: item.sqft_living15/item.count,
+                 sqft_lot15:    item.sqft_lot15/item.count,
+                 waterfront:    item.waterfront/item.count
+             }
+         })
+
+        // create dictionary for faster value retrival for a specific zip code
+        const dictionary = averaged.reduce((a,x) => ({...a, [x.zipcode]: x}), {})
+
+        return dictionary;
+    });
+
+    return averagedByZipCode;
+}
 
 /**
  * Read which variable should be encoded
@@ -293,21 +360,20 @@ function readColorCoding() {
  * Create a scale based on the filtered data and the variable to color
  */
 function createScale(dataPromise, colorCodingVariable) {
-    // TODO: Maybe not create a scale, just the domain, but for each column. The visualizationsConfig parameter for
-    //  updateCharts (eg) could then hold the domain (=min and max value) for each column, and create the which ever
-    //  scales are actually needed.
-
     // Use a linear scale (from white to blue) for numeric variables (we don't have categorical variables, hence linear
     // scales should be fine). Boolean and datetime columns are also just numerical values.
-    // However, maybe datetimes need a different scale, d3 supports a d3.scaleTime after all ...
     return dataPromise
-        .then(data => data
-            .map(datum => datum[colorCodingVariable.id])
-            .filter(element => element !== colorCodingVariable.nanValue)
-        )
-        .then(dataColumn => d3.scaleTime()
-            .domain([d3.min(dataColumn), d3.max(dataColumn)])
-        );
+        .then(data => {
+            array = []
+            //transform dict to array
+            for (key in data)
+                array.push(data[key])
+            return array.map(datum => datum[colorCodingVariable.id])
+                        .filter(element => element !== colorCodingVariable.nanValue)
+        })
+        .then(dataColumn => d3.scaleLinear()
+                            .domain([d3.min(dataColumn), d3.max(dataColumn)])
+            );
 }
 
 
@@ -316,18 +382,18 @@ function createScale(dataPromise, colorCodingVariable) {
  */
 function createColorScale(scalePromise) {
     return scalePromise.then(scale => scale
-        .range(["rgb(255,255,255)", "rgb(0,0,255)"]) // TODO: Insert proper values
+        .range(["#ffeda0", "#800026"])
         .unknown("rgb(204,204,204)")
     );
 }
 
 
 /**
- * Create a size scale based on a scale
+ * Create a size scale based on a scale - Not used in the end
  */
 function createSizeScale(scalePromise) {
     return scalePromise.then(scale => scale
-        .range([5, 30]) // TODO: Insert proper values
+        .range([5, 30])
         .unknown(3)
     );
 }
@@ -342,26 +408,26 @@ function copyScale(scalePromise) {
 }
 
 
-/*
- * Update visualizations
- */
-
-
 /**
  * Update the views (map etc.)
  */
 function updateVisualizations() {
     const filters = readFilters();
     const filteredData = filterData(filters);
+    const averagedByZipCode = averageByZipCode(filteredData);
     const colorCodingVariable = readColorCoding();
-    const scalePromise = createScale(filteredData, colorCodingVariable);
+    var scalePromise;
+    if (mapZoomed())
+       scalePromise = createScale(filteredData, colorCodingVariable);
+    else
+        scalePromise = createScale(averagedByZipCode, colorCodingVariable);
 
     const mapConfig = {
         colorCodingVariableName: colorCodingVariable.id, // The name of the variable that should be used for visual encoding
         colorScalePromise: createColorScale(copyScale(scalePromise)), // The color scale for visual encoding
         sizeScalePromise: createSizeScale(copyScale(scalePromise)), // The size scale for visual encoding
     }
-    updateMap(filteredData, mapConfig);
+    updateMap(filteredData, averagedByZipCode, mapConfig);
 
     // TODO: Properly set visualizationsConfig depending on the actual needs of the visualization. See especially the
     //  comment in function createScale.
