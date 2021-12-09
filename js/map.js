@@ -7,6 +7,7 @@ var map; // Leaflet map object
 var geojson; // Geojson layer representing the zip-code areas
 var housesLayer; // Layer representing all the circles which are individual houses
 var info; // Div in top-right corner containing information about a zip-code area / specific house
+var legend; // Div in bottom-right corner containing information about the color scale
 var house_data; // The array containg all the filtered data on houses
 
 var averaged = {} //dictionary containing the average values for each column based on zip-code
@@ -17,6 +18,9 @@ var colorCodingVariableName = 'price';
 window.addEventListener("load", initLeaflet);
 
 function updateMapElements() {
+    if (legend){
+        legend.update();
+    }
     if(geojson) {
         map.removeLayer(geojson)
     }
@@ -124,6 +128,33 @@ function initLeaflet(){
         }
     };
 
+    legend = L.control({position: 'bottomright'});
+
+    legend.onAdd = function (map) {
+        this._divLegend = L.DomUtil.create('div', 'info legend');
+        this.update();
+        return this._divLegend;
+    };
+
+    legend.update = function () {
+        if (colorScale.domain){
+            grades = []
+            for (let i = 0; i<=7; i++){
+                grades.push(colorScale.domain()[0] + i / 7. * (colorScale.domain()[1] - colorScale.domain()[0]))
+            }
+            this._divLegend.innerHTML = '';
+
+            // loop through our density intervals and generate a label with a colored square for each interval
+            for (var i = 0; i < grades.length; i++) {
+                this._divLegend.innerHTML +=
+                    '<i style="background:' + colorScale(grades[i]) + '"></i> ' +
+                    new Intl.NumberFormat('de-DE').format((Math.round(grades[i] * 100) / 100).toFixed(2)) + '<br>';
+            }
+        }
+    };
+
+    legend.addTo(map);
+
     info.addTo(map);
     
     // we need to update the whole visualization since in case of zooming in and passing 
@@ -212,7 +243,6 @@ function updateMap(dataPromise, averagedDataPromise, mapConfig) {
             sizeScale = values[2];
             colorScale = values[3];
             colorCodingVariableName = values[4];
-
             updateMapElements();
         });
 

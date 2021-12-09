@@ -33,58 +33,61 @@ function updateHistogramChart(data, selector, title) {
     const width = $(selector).width() - margin.left - margin.right;
     const height = $(selector).height() - margin.top - margin.bottom;
 
-    var svg = d3.select(selector)
-        .append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-        .append("g")
-        .attr("transform",  "translate(" + margin.left + "," + margin.top + ")");
+    if (height>0 && width>0){
+        var svg = d3.select(selector)
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform",  "translate(" + margin.left + "," + margin.top + ")");
+    
+        const priceHistogram = histogram(data, 20);
+        const xDomain = priceHistogram.map(bucket => bucket.label);
+        const yMin = d3.min(priceHistogram.map(bucket => bucket.count));
+        const yMax = d3.max(priceHistogram.map(bucket => bucket.count));
+    
+        // https://www.d3-graph-gallery.com/graph/barplot_basic.html
+    
+        // X axis
+        var x = d3.scaleBand()
+            .range([ 0, width ])
+            .domain(xDomain)
+            .padding(0.2);
+        svg.append("g")
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.axisBottom(x))
+            .selectAll("text")
+            .attr("transform", "translate(-10,0)rotate(-45)")
+            .style("text-anchor", "end");
+    
+        // Y axis
+        var y = d3.scaleLinear()
+            .domain([yMin, yMax])
+            .range([ height, 0]);
+        svg.append("g")
+            .call(d3.axisLeft(y));
+    
+        // Bars
+        svg.selectAll("mybar")
+            .data(priceHistogram)
+            .enter()
+            .append("rect")
+            .attr("x", function(d) { return x(d.label); })
+            .attr("y", function(d) { return y(d.count); })
+            .attr("width", x.bandwidth())
+            .attr("height", function(d) { return height - y(d.count); })
+            .attr("fill", "#69b3a2");
+    
+        // Title
+        svg.append("text")
+            .attr("x", (width / 2))
+            .attr("y", 0 - (margin.top / 2))
+            .attr("text-anchor", "middle")
+            .style("font-size", "16px")
+            .style("text-decoration", "underline")
+            .text(title);
+    }
 
-    const priceHistogram = histogram(data, 20);
-    const xDomain = priceHistogram.map(bucket => bucket.label);
-    const yMin = d3.min(priceHistogram.map(bucket => bucket.count));
-    const yMax = d3.max(priceHistogram.map(bucket => bucket.count));
-
-    // https://www.d3-graph-gallery.com/graph/barplot_basic.html
-
-    // X axis
-    var x = d3.scaleBand()
-        .range([ 0, width ])
-        .domain(xDomain)
-        .padding(0.2);
-    svg.append("g")
-        .attr("transform", "translate(0," + height + ")")
-        .call(d3.axisBottom(x))
-        .selectAll("text")
-        .attr("transform", "translate(-10,0)rotate(-45)")
-        .style("text-anchor", "end");
-
-    // Y axis
-    var y = d3.scaleLinear()
-        .domain([yMin, yMax])
-        .range([ height, 0]);
-    svg.append("g")
-        .call(d3.axisLeft(y));
-
-    // Bars
-    svg.selectAll("mybar")
-        .data(priceHistogram)
-        .enter()
-        .append("rect")
-        .attr("x", function(d) { return x(d.label); })
-        .attr("y", function(d) { return y(d.count); })
-        .attr("width", x.bandwidth())
-        .attr("height", function(d) { return height - y(d.count); })
-        .attr("fill", "#69b3a2");
-
-    // Title
-    svg.append("text")
-        .attr("x", (width / 2))
-        .attr("y", 0 - (margin.top / 2))
-        .attr("text-anchor", "middle")
-        .style("font-size", "16px")
-        .style("text-decoration", "underline")
-        .text(title);
 }
 
 
